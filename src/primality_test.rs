@@ -64,6 +64,11 @@ pub fn miller_rabin_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> 
     return TestResult::ProbablyPrime;
 }
 
+/// Performs the Miller-Rabin test
+///
+/// **number**       - the number to test
+///
+/// **rounds_count** - if None, then will be set to log2(**number**)
 pub fn fermat_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> TestResult {
     let ref const_2 = 2u8.into();
     if let Some(test_result) = small_pure_test(number, const_2) {
