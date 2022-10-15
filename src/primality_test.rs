@@ -64,7 +64,7 @@ pub fn miller_rabin_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> 
     return TestResult::ProbablyPrime;
 }
 
-/// Performs the Miller-Rabin test
+/// Performs the Fermat test
 ///
 /// **number**       - the number to test
 ///
