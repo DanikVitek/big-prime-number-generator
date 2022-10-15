@@ -9,7 +9,7 @@ use anyhow::Context;
 use indicatif::ParallelProgressIterator;
 use inquire::{CustomType, InquireError};
 use rayon::prelude::*;
-use std::{fs::File, io::Write, num::NonZeroU64};
+use std::{fs::File, io::Write, num::NonZeroU64, sync::Mutex};
 
 const OUTPUT_FILE: &str = "./output.txt";
 
@@ -23,17 +23,20 @@ fn main() -> anyhow::Result<()> {
                     .map(|amount| (n_bits, amount))
             }) {
             Ok((n_bits, amount)) => {
-                let file = File::create(OUTPUT_FILE).context("Creating output file")?;
+                let file = Mutex::new(File::create(OUTPUT_FILE).context("Creating output file")?);
 
                 (0..amount.get())
                     .into_par_iter()
                     .progress_count(amount.get())
                     .for_each(|_| {
-                        writeln!(&file, "{}", generate_prime(n_bits))
-                            .context("Writing number to file")
-                            .unwrap();
+                        writeln!(
+                            file.lock().expect("Locking file for thread-safe writing"),
+                            "{}",
+                            generate_prime(n_bits)
+                        )
+                        .context("Writing number to file")
+                        .unwrap()
                     });
-
                 println!("\n")
             }
             Err(e) => match e {
