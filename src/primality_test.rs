@@ -40,7 +40,7 @@ pub fn miller_rabin_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> 
         s += 1;
     }
     let mut rng = rand::thread_rng();
-    let ref nm2 = number - 2u8;
+    let nm2 = &(number - 2u8);
     'A: for _ in 0..rounds_count
         .map(|k| k.into())
         .unwrap_or_else(|| log2(number).unwrap())
@@ -51,7 +51,7 @@ pub fn miller_rabin_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> 
             continue;
         }
         for _ in 0..s {
-            x = x.modpow(&const_2, &number);
+            x = x.modpow(&const_2, number);
             if x.is_one() {
                 return TestResult::Composite;
             }
@@ -61,23 +61,24 @@ pub fn miller_rabin_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> 
         }
         return TestResult::Composite;
     }
-    return TestResult::ProbablyPrime;
+
+    TestResult::ProbablyPrime
 }
 
-/// Performs the Miller-Rabin test
+/// Performs the Fermat test
 ///
 /// **number**       - the number to test
 ///
 /// **rounds_count** - if None, then will be set to log2(**number**)
 pub fn fermat_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> TestResult {
-    let ref const_2 = 2u8.into();
+    let const_2 = &2u8.into();
     if let Some(test_result) = small_pure_test(number, const_2) {
         return test_result;
     }
 
     let mut rng = rand::thread_rng();
-    let ref nm1 = number - 1u8;
-    let ref nm2 = number - 2u8;
+    let nm1 = &(number - 1u8);
+    let nm2 = &(number - 2u8);
     for _ in 0..rounds_count
         .map(|k| k.into())
         .unwrap_or_else(|| log2(number).unwrap())
@@ -91,7 +92,8 @@ pub fn fermat_test(number: &BigUint, rounds_count: Option<NonZeroU64>) -> TestRe
             return TestResult::Composite;
         }
     }
-    return TestResult::ProbablyPrime;
+
+    TestResult::ProbablyPrime
 }
 
 fn small_pure_test(number: &BigUint, const_2: &BigUint) -> Option<TestResult> {
@@ -111,109 +113,4 @@ fn small_pure_test(number: &BigUint, const_2: &BigUint) -> Option<TestResult> {
         return Some(TestResult::Composite);
     }
     None
-}
-
-#[test]
-fn miller_rabin_test_100_is_composite() {
-    assert_eq!(
-        TestResult::Composite,
-        miller_rabin_test(&100u8.into(), None)
-    )
-}
-
-#[test]
-fn miller_rabin_test_100_000_is_composite() {
-    assert_eq!(
-        TestResult::Composite,
-        miller_rabin_test(&BigUint::parse_bytes(b"100_000", 10).unwrap(), None)
-    )
-}
-
-#[test]
-fn miller_rabin_test_23_is_prime() {
-    assert_eq!(TestResult::Prime, miller_rabin_test(&23u8.into(), None))
-}
-
-#[test]
-fn miller_rabin_test_37_is_probably_prime() {
-    assert_eq!(
-        TestResult::ProbablyPrime,
-        miller_rabin_test(&37u8.into(), None)
-    )
-}
-
-#[test]
-fn miller_rabin_test_20_988_936_657_440_586_486_151_264_256_610_222_593_863_921_is_probably_prime()
-{
-    assert_eq!(
-        TestResult::ProbablyPrime,
-        miller_rabin_test(
-            &BigUint::parse_bytes(
-                b"20_988_936_657_440_586_486_151_264_256_610_222_593_863_921",
-                10
-            )
-            .unwrap(),
-            None
-        )
-    )
-}
-
-#[test]
-#[allow(non_snake_case)]
-fn miller_rabin_test_M607_is_probably_prime() {
-    let M607 = BigUint::parse_bytes(
-        b"531137992816767098689588206552468627329593117727031923199444138200403559860852242739162502265229285668889329486246501015346579337652707239409519978766587351943831270835393219031728127",
-        10
-    )
-    .unwrap();
-    assert_eq!(TestResult::ProbablyPrime, miller_rabin_test(&M607, None))
-}
-
-#[test]
-fn fermat_test_100_is_composite() {
-    assert_eq!(TestResult::Composite, fermat_test(&100u8.into(), None))
-}
-
-#[test]
-fn fermat_test_100_000_is_composite() {
-    assert_eq!(
-        TestResult::Composite,
-        fermat_test(&BigUint::parse_bytes(b"100_000", 10).unwrap(), None)
-    )
-}
-
-#[test]
-fn fermat_test_23_is_prime() {
-    assert_eq!(TestResult::Prime, fermat_test(&23u8.into(), None))
-}
-
-#[test]
-fn fermat_test_37_is_probably_prime() {
-    assert_eq!(TestResult::ProbablyPrime, fermat_test(&37u8.into(), None))
-}
-
-#[test]
-fn fermat_test_20_988_936_657_440_586_486_151_264_256_610_222_593_863_921_is_probably_prime() {
-    assert_eq!(
-        TestResult::ProbablyPrime,
-        fermat_test(
-            &BigUint::parse_bytes(
-                b"20_988_936_657_440_586_486_151_264_256_610_222_593_863_921",
-                10
-            )
-            .unwrap(),
-            None
-        )
-    )
-}
-
-#[test]
-#[allow(non_snake_case)]
-fn fermat_test_M607_is_probably_prime() {
-    let M607 = BigUint::parse_bytes(
-        b"531137992816767098689588206552468627329593117727031923199444138200403559860852242739162502265229285668889329486246501015346579337652707239409519978766587351943831270835393219031728127",
-        10
-    )
-    .unwrap();
-    assert_eq!(TestResult::ProbablyPrime, fermat_test(&M607, None))
 }

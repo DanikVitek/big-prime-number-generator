@@ -8,7 +8,7 @@ use crate::primality_test::{fermat_test, miller_rabin_test};
 
 pub fn generate_prime(n_bits: NonZeroU64) -> BigUint {
     let mut rng = rand::thread_rng();
-    let ref distr = RandomBits::new(n_bits.get());
+    let distr = &RandomBits::new(n_bits.get());
 
     loop {
         let mut prime_candidate: BigUint = rng.sample(distr);

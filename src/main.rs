@@ -1,6 +1,8 @@
 mod generator;
 mod math;
 mod primality_test;
+#[cfg(test)]
+mod tests;
 
 use crate::generator::generate_prime;
 use anyhow::Context;
@@ -27,7 +29,7 @@ fn main() -> anyhow::Result<()> {
                     .into_par_iter()
                     .progress_count(amount.get())
                     .for_each(|_| {
-                        write!(&file, "{}\n", generate_prime(n_bits))
+                        writeln!(&file, "{}", generate_prime(n_bits))
                             .context("Writing number to file")
                             .unwrap();
                     });

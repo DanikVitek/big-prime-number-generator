@@ -12,13 +12,3 @@ pub fn log2(num: &BigUint) -> anyhow::Result<u64> {
     }
     Ok(num.to_str_radix(2).len() as u64 - 1)
 }
-
-#[test]
-fn _64_log2_equals_6() {
-    assert_eq!(6u64, log2(&64u8.into()).unwrap())
-}
-
-#[test]
-fn _100_log2_equals_6() {
-    assert_eq!(6u64, log2(&100u8.into()).unwrap())
-}
